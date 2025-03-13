@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 // Define a TS type for the data we'll be using
 export interface Post {
@@ -17,8 +17,15 @@ const initialState: Post[] = [
 const postsSlice = createSlice({
     name: 'posts',
     initialState,
-    reducers: {}
+    reducers: {
+        postAdded(state, action: PayloadAction<Post>) {
+            state.push(action.payload)
+        }
+    }
 })
 
 // Export the generated reducer function
 export default postsSlice.reducer
+
+// Export the auto-generated action creator with the same name
+export const { postAdded } = postsSlice.actions
