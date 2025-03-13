@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 
 import { Navbar } from './components/Navbar'
+import PostsList from './features/posts/PostsList'
+import { AddPostForm } from './features/posts/AddPostForm'
 
 function App() {
   return (
@@ -12,7 +14,10 @@ function App() {
             path="/"
             element={
               <section>
-                <h2>Welcome to the Redux Essentials example app!</h2>
+                <>
+                  <AddPostForm />
+                  <PostsList />
+                </>
               </section>
             }
           ></Route>
