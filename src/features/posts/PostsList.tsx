@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { selectAllPosts } from './postsSlice'
 import { PostAuthor } from './PostAuthor'
 import { TimeAgo } from '@/components/TimeAgo'
+import { ReactionButtons } from './ReactionButtons'
 
 const PostsList = () => {
   const posts = useAppSelector(selectAllPosts)
@@ -17,6 +18,7 @@ const PostsList = () => {
       <PostAuthor userId={post.user} />
       <TimeAgo timestamp={post.date} />
       <p className="post-content">{post.content.substring(0, 100)}</p>
+      <ReactionButtons post={post} />
     </article>
   ))
 
