@@ -2,6 +2,7 @@ import { RootState } from '@/app/store'
 import { createAsyncThunk, createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit'
 import { userLoggedOut } from '../auth/authSlice'
 import { client } from '@/api/client'
+import { createAppAsyncThunk } from '@/app/withTypes'
 
 export interface Reactions {
   thumbsUp: number
@@ -39,10 +40,21 @@ interface PostsState {
 }
 
 // thunk
-export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
-  const response = await client.get<Post[]>('/fakeApi/posts')
-  return response.data
-})
+export const fetchPosts = createAppAsyncThunk(
+  'posts/fetchPosts',
+  async () => {
+    const response = await client.get<Post[]>('/fakeApi/posts')
+    return response.data
+  },
+  {
+    condition(arg, thunkApi) {
+      const postsStatus = selectPostsStatus(thunkApi.getState())
+      if (postsStatus !== 'idle') {
+        return false
+      }
+    },
+  },
+)
 
 // Create an initial state value for the reducer, with that type
 const initialState: PostsState = {
