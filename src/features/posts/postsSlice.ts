@@ -1,6 +1,7 @@
 import { RootState } from '@/app/store'
-import { createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit'
 import { userLoggedOut } from '../auth/authSlice'
+import { client } from '@/api/client'
 
 export interface Reactions {
   thumbsUp: number
@@ -36,6 +37,12 @@ interface PostsState {
   status: 'idle' | 'pending' | 'succeeded' | 'failed'
   error: string | null
 }
+
+// thunk
+export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
+  const response = await client.get<Post[]>('/fakeApi/posts')
+  return response.data
+})
 
 // Create an initial state value for the reducer, with that type
 const initialState: PostsState = {
@@ -84,11 +91,25 @@ const postsSlice = createSlice({
   },
   extraReducers: (builder) => {
     // Pass the action creator to `builder.addCase()`
-    builder.addCase(userLoggedOut, (state) => {
-      // Clear out the list of posts whenever the user logs out
-      return initialState
-    })
+    builder
+      .addCase(userLoggedOut, (state) => {
+        // Clear out the list of posts whenever the user logs out
+        return initialState
+      })
+      .addCase(fetchPosts.pending, (state, action) => {
+        state.status = 'pending'
+      })
+      .addCase(fetchPosts.fulfilled, (state, action) => {
+        state.status = 'succeeded'
+        // Add any fetched posts to the array
+        state.posts.push(...action.payload)
+      })
+      .addCase(fetchPosts.rejected, (state, action) => {
+        state.status = 'failed'
+        state.error = action.error.message ?? 'Unknown Error'
+      })
   },
+
 })
 
 // Export the generated reducer function
