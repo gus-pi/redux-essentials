@@ -35,7 +35,7 @@ type PostUpdate = Pick<Post, 'id' | 'title' | 'content'>
 
 interface PostsState {
   posts: Post[]
-  status: 'idle' | 'pending' | 'succeeded' | 'failed'
+  status: 'idle' | 'pending' | 'succeeded' | 'failed' | 'rejected'
   error: string | null
 }
 
@@ -60,7 +60,7 @@ export const fetchPosts = createAppAsyncThunk(
 const initialState: PostsState = {
   posts: [],
   status: 'idle',
-  error: null
+  error: null,
 }
 
 // Create the slice and pass in the initial state
@@ -121,7 +121,6 @@ const postsSlice = createSlice({
         state.error = action.error.message ?? 'Unknown Error'
       })
   },
-
 })
 
 // Export the generated reducer function
