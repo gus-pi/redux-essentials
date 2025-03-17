@@ -134,3 +134,9 @@ export const selectPostById = (state: RootState, postId: string) => state.posts.
 
 export const selectPostsStatus = (state: RootState) => state.posts.status
 export const selectPostsError = (state: RootState) => state.posts.error
+
+export const selectPostsByUser = (state: RootState, userId: string) => {
+  const allPosts = selectAllPosts(state)
+  // ❌ This seems suspicious! See more details below
+  return allPosts.filter((post) => post.user === userId)
+}
