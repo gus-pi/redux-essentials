@@ -1,8 +1,8 @@
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
-import React from 'react'
-import { Post, postAdded } from './postsSlice'
-import { selectAllUsers } from '../users/usersSlice'
+import React, { useState } from 'react'
 import { selectCurrentUsername } from '../auth/authSlice'
+import { fetchUsers } from '../users/usersSlice'
+import { addNewPost } from './postsSlice'
 
 // TS types for the input fields
 // See: https://epicreact.dev/how-to-type-a-react-form-on-submit-handler/
@@ -19,7 +19,9 @@ export const AddPostForm = () => {
   const dispatch = useAppDispatch()
   const userId = useAppSelector(selectCurrentUsername)!
 
-  const handleSubmit = (e: React.FormEvent<AddPostFormElements>) => {
+  const [addRequestStatus, setAddRequestStatus] = useState<'idle' | 'pending'>('idle')
+
+  const handleSubmit = async (e: React.FormEvent<AddPostFormElements>) => {
     // Prevent server submission
     e.preventDefault()
 
@@ -27,9 +29,18 @@ export const AddPostForm = () => {
     const title = elements.postTitle.value
     const content = elements.postContent.value
 
-    dispatch(postAdded(title, content, userId))
+    const form = e.currentTarget
 
-    e.currentTarget.reset()
+    try {
+      setAddRequestStatus('pending')
+      await dispatch(addNewPost({ title, content, user: userId })).unwrap()
+
+      form.reset()
+    } catch (err) {
+      console.error('Failed to save the post: ', err)
+    } finally {
+      setAddRequestStatus('idle')
+    }
   }
 
   return (
