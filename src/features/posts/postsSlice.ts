@@ -32,6 +32,7 @@ const initialReactions: Reactions = {
 }
 
 type PostUpdate = Pick<Post, 'id' | 'title' | 'content'>
+type NewPost = Pick<Post, 'title' | 'content' | 'user'>
 
 interface PostsState {
   posts: Post[]
@@ -56,6 +57,17 @@ export const fetchPosts = createAppAsyncThunk(
   },
 )
 
+export const addNewPost = createAppAsyncThunk(
+  'posts/addNewPost',
+  // The payload creator receives the partial `{title, content, user}` object
+  async (initialPost: NewPost) => {
+    // We send the initial data to the fake API server
+    const response = await client.post<Post>('/fakeApi/posts', initialPost)
+    // The response includes the complete post object, including unique ID
+    return response.data
+  },
+)
+
 // Create an initial state value for the reducer, with that type
 const initialState: PostsState = {
   posts: [],
@@ -68,23 +80,6 @@ const postsSlice = createSlice({
   name: 'posts',
   initialState,
   reducers: {
-    postAdded: {
-      reducer(state, action: PayloadAction<Post>) {
-        state.posts.push(action.payload)
-      },
-      prepare(title: string, content: string, userId: string) {
-        return {
-          payload: {
-            id: nanoid(),
-            title,
-            date: new Date().toISOString(),
-            content,
-            user: userId,
-            reactions: initialReactions,
-          },
-        }
-      },
-    },
     postUpdated(state, action: PayloadAction<PostUpdate>) {
       const { id, title, content } = action.payload
       const existingPost = state.posts.find((post) => post.id === id)
@@ -120,6 +115,10 @@ const postsSlice = createSlice({
         state.status = 'failed'
         state.error = action.error.message ?? 'Unknown Error'
       })
+      .addCase(addNewPost.fulfilled, (state, action) => {
+        // We can directly add the new post object to our posts array
+        state.posts.push(action.payload)
+      })
   },
 })
 
@@ -127,7 +126,7 @@ const postsSlice = createSlice({
 export default postsSlice.reducer
 
 // Export the auto-generated action creator with the same name
-export const { postAdded, postUpdated, reactionAdded } = postsSlice.actions
+export const { postUpdated, reactionAdded } = postsSlice.actions
 
 export const selectAllPosts = (state: RootState) => state.posts.posts
 
